@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useState, type FormEvent } from 'react';
 import { api, ApiError } from '../api';
 import { IconAlert, IconPlus, IconUsers } from '../components/Icons';
+import { Pagination } from '../components/Pagination';
+import { usePagination } from '../hooks/usePagination';
 import type { AdminUser } from '../types';
 
 type Props = {
@@ -15,6 +17,7 @@ export function UsersPage({ notify }: Props) {
   const [password, setPassword] = useState('');
   const [busy, setBusy] = useState(false);
   const activeCount = users.filter((u) => u.is_active).length;
+  const pagination = usePagination(users);
 
   const load = useCallback(async () => {
     try {
@@ -27,6 +30,11 @@ export function UsersPage({ notify }: Props) {
   useEffect(() => {
     void load();
   }, [load]);
+
+  useEffect(() => {
+    pagination.reset();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [users.length]);
 
   async function onCreate(event: FormEvent) {
     event.preventDefault();
@@ -118,6 +126,9 @@ export function UsersPage({ notify }: Props) {
       <div className="panel">
         <div className="panel-header">
           <h2>Listado</h2>
+          <span className="meta" style={{ margin: 0 }}>
+            {users.length} usuario{users.length === 1 ? '' : 's'}
+          </span>
         </div>
         {users.length === 0 ? (
           <div className="empty">
@@ -127,45 +138,66 @@ export function UsersPage({ notify }: Props) {
             Sin usuarios.
           </div>
         ) : (
-          <div className="table-wrap">
-            <table className="table">
-              <thead>
-                <tr>
-                  <th>Nombre</th>
-                  <th>Correo</th>
-                  <th>Estado</th>
-                </tr>
-              </thead>
-              <tbody>
-                {users.map((user) => {
-                  // No dejar el panel sin ningún admin activo.
-                  const canToggle = user.is_active ? activeCount > 1 : true;
-                  return (
-                    <tr key={user.id}>
-                      <td className="file-name">{user.full_name}</td>
-                      <td>{user.email}</td>
-                      <td>
-                        <div className="status-cell">
-                          <span className={`badge ${user.is_active ? 'badge-ok' : 'badge-off'}`}>
-                            {user.is_active ? 'Activo' : 'Inactivo'}
-                          </span>
-                          {canToggle ? (
-                            <button
-                              type="button"
-                              className={`status-action ${user.is_active ? 'is-off' : 'is-on'}`}
-                              onClick={() => void toggleActive(user)}
-                            >
-                              {user.is_active ? 'Desactivar' : 'Activar'}
-                            </button>
-                          ) : null}
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+          <>
+            <div className="table-wrap">
+              <table className="table">
+                <thead>
+                  <tr>
+                    <th>Nombre</th>
+                    <th>Correo</th>
+                    <th>Activo</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {pagination.pageItems.map((user) => {
+                    const canToggle = user.is_active ? activeCount > 1 : true;
+                    return (
+                      <tr key={user.id}>
+                        <td className="file-name">{user.full_name}</td>
+                        <td>{user.email}</td>
+                        <td>
+                          <label
+                            className={`switch${canToggle ? '' : ' is-disabled'}`}
+                            title={
+                              canToggle
+                                ? user.is_active
+                                  ? 'Desactivar usuario'
+                                  : 'Activar usuario'
+                                : 'No se puede desactivar al único administrador activo'
+                            }
+                          >
+                            <input
+                              type="checkbox"
+                              checked={user.is_active}
+                              disabled={!canToggle}
+                              onChange={() => void toggleActive(user)}
+                              aria-label={
+                                user.is_active
+                                  ? `Desactivar a ${user.full_name}`
+                                  : `Activar a ${user.full_name}`
+                              }
+                            />
+                            <span className="switch-track" aria-hidden>
+                              <span className="switch-thumb" />
+                            </span>
+                          </label>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+            <Pagination
+              page={pagination.page}
+              totalPages={pagination.totalPages}
+              total={pagination.total}
+              from={pagination.from}
+              to={pagination.to}
+              onPageChange={pagination.goTo}
+              label="usuarios"
+            />
+          </>
         )}
       </div>
     </section>

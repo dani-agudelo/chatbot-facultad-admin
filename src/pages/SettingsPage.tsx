@@ -48,7 +48,7 @@ function setSafeHex(raw: string, onChange: (next: string) => void) {
 }
 
 function keyStatus(setInDb: boolean, inEnv: boolean): { label: string; className: string } {
-  if (setInDb) return { label: 'Guardada en BD (cifrada)', className: 'badge badge-ok' };
+  if (setInDb) return { label: 'Guardada en BD', className: 'badge badge-ok' };
   if (inEnv) return { label: 'Usando .env', className: 'badge badge-off' };
   return { label: 'No configurada', className: 'badge badge-off' };
 }

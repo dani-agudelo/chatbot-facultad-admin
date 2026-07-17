@@ -2,6 +2,8 @@ import { useCallback, useEffect, useRef, useState, type FormEvent } from 'react'
 import { api, ApiError } from '../api';
 import { ConfirmModal } from '../components/ConfirmModal';
 import { IconAlert, IconFiles, IconRefresh, IconTrash, IconUpload } from '../components/Icons';
+import { Pagination } from '../components/Pagination';
+import { usePagination } from '../hooks/usePagination';
 import type { DocumentItem } from '../types';
 
 type Props = {
@@ -25,6 +27,7 @@ export function DocumentsPage({ notify }: Props) {
   const [busyDelete, setBusyDelete] = useState(false);
   const [selectedName, setSelectedName] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
+  const pagination = usePagination(docs);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -41,6 +44,11 @@ export function DocumentsPage({ notify }: Props) {
   useEffect(() => {
     void load();
   }, [load]);
+
+  useEffect(() => {
+    pagination.reset();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [docs.length]);
 
   async function onUpload(event: FormEvent) {
     event.preventDefault();
@@ -123,6 +131,7 @@ export function DocumentsPage({ notify }: Props) {
       </div>
 
       <div className="banner banner-info">
+        Pasos: 1) Subir documento → 2) Reindexar → 3) Probar en Chat de prueba.
       </div>
 
       {error ? (
@@ -185,38 +194,49 @@ export function DocumentsPage({ notify }: Props) {
             No hay documentos. Sube el primer archivo institucional.
           </div>
         ) : (
-          <div className="table-wrap">
-            <table className="table">
-              <thead>
-                <tr>
-                  <th>Archivo</th>
-                  <th>Tamaño</th>
-                  <th>Actualizado</th>
-                  <th className="sr-only">Acciones</th>
-                </tr>
-              </thead>
-              <tbody>
-                {docs.map((doc) => (
-                  <tr key={doc.file_name}>
-                    <td className="file-name">{doc.file_name}</td>
-                    <td>{formatBytes(doc.size_bytes)}</td>
-                    <td>{new Date(doc.updated_at).toLocaleString()}</td>
-                    <td>
-                      <button
-                        type="button"
-                        className="btn btn-icon danger"
-                        aria-label={`Eliminar ${doc.file_name}`}
-                        title="Eliminar"
-                        onClick={() => setPendingDelete(doc.file_name)}
-                      >
-                        <IconTrash size={18} />
-                      </button>
-                    </td>
+          <>
+            <div className="table-wrap">
+              <table className="table">
+                <thead>
+                  <tr>
+                    <th>Archivo</th>
+                    <th>Tamaño</th>
+                    <th>Actualizado</th>
+                    <th className="sr-only">Acciones</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody>
+                  {pagination.pageItems.map((doc) => (
+                    <tr key={doc.file_name}>
+                      <td className="file-name">{doc.file_name}</td>
+                      <td>{formatBytes(doc.size_bytes)}</td>
+                      <td>{new Date(doc.updated_at).toLocaleString()}</td>
+                      <td>
+                        <button
+                          type="button"
+                          className="btn btn-icon danger"
+                          aria-label={`Eliminar ${doc.file_name}`}
+                          title="Eliminar"
+                          onClick={() => setPendingDelete(doc.file_name)}
+                        >
+                          <IconTrash size={18} />
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <Pagination
+              page={pagination.page}
+              totalPages={pagination.totalPages}
+              total={pagination.total}
+              from={pagination.from}
+              to={pagination.to}
+              onPageChange={pagination.goTo}
+              label="archivos"
+            />
+          </>
         )}
       </div>
 
