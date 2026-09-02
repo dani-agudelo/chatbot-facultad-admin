@@ -84,11 +84,37 @@ export function SettingsPage({ notify }: Props) {
         setAccentColor(data.accent_color || '#f27022');
         setBrandName(data.brand_name || 'Chatbot Facultad');
         setBrandSubtitle(data.brand_subtitle || 'Administración');
+        applyBranding({
+          logo_url: data.logo_url || '',
+          primary_color: data.primary_color || '#00407d',
+          accent_color: data.accent_color || '#f27022',
+          brand_name: data.brand_name || 'Chatbot Facultad',
+          brand_subtitle: data.brand_subtitle || 'Administración',
+        });
       } catch (err) {
         setError(err instanceof ApiError ? err.message : 'No se pudo cargar la configuración.');
       }
     })();
-  }, []);
+  }, [applyBranding]);
+
+  useEffect(() => {
+    if (!settings) return;
+    applyBranding({
+      logo_url: logoUrl.trim(),
+      primary_color: primaryColor,
+      accent_color: accentColor,
+      brand_name: brandName.trim() || 'Chatbot Facultad',
+      brand_subtitle: brandSubtitle,
+    });
+  }, [
+    settings,
+    logoUrl,
+    primaryColor,
+    accentColor,
+    brandName,
+    brandSubtitle,
+    applyBranding,
+  ]);
 
   async function onSubmit(event: FormEvent) {
     event.preventDefault();
@@ -264,6 +290,9 @@ export function SettingsPage({ notify }: Props) {
                 onChange={(e) => setLogoUrl(e.target.value)}
                 placeholder="https://…/logo-facultad.png"
               />
+              <span className="field-hint">
+                El menú lateral usa este logo. Pulsa guardar para conservarlo.
+              </span>
             </label>
             {logoUrl.trim() ? (
               <div className="logo-preview">

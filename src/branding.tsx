@@ -47,7 +47,7 @@ export function BrandingProvider({ children }: { children: ReactNode }) {
       const data = await api<Branding>('/admin/branding');
       applyBranding({ ...DEFAULT_BRANDING, ...data });
     } catch {
-      applyBranding(DEFAULT_BRANDING);
+      // Conserva el branding actual; no volver a las iniciales FI si el GET falla.
     } finally {
       setLoading(false);
     }

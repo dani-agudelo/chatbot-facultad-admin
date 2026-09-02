@@ -361,7 +361,7 @@ textarea {
   display: block;
   width: 100%;
   height: auto;
-  max-height: 72px;
+  max-height: 88px;
   object-fit: contain;
   object-position: left center;
   background: transparent;

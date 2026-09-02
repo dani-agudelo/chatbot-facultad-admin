@@ -1,6 +1,7 @@
 import { NavLink, Outlet } from 'react-router-dom';
 import { useAuth } from '../auth';
 import { useBranding } from '../branding';
+import { BrandLogo } from './BrandLogo';
 import {
   IconChat,
   IconFiles,
@@ -32,19 +33,7 @@ export function Shell() {
     <div className="app-shell">
       <aside className="sidebar">
         <div className={`sidebar-brand${hasLogo ? ' has-logo' : ''}`}>
-          {hasLogo ? (
-            <div className="brand-logo-wrap">
-              <img
-                className="brand-logo"
-                src={branding.logo_url}
-                alt={branding.brand_name}
-              />
-            </div>
-          ) : (
-            <div className="brand-mark" aria-hidden>
-              FI
-            </div>
-          )}
+          <BrandLogo src={branding.logo_url} alt={branding.brand_name} />
           <div>
             <strong>{branding.brand_name}</strong>
             <span>{branding.brand_subtitle}</span>

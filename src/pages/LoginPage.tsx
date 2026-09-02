@@ -3,6 +3,7 @@ import { Navigate } from 'react-router-dom';
 import { useAuth } from '../auth';
 import { useBranding } from '../branding';
 import { ApiError } from '../api';
+import { BrandLogo } from '../components/BrandLogo';
 
 export function LoginPage() {
   const { user, loading, login } = useAuth();
@@ -32,9 +33,7 @@ export function LoginPage() {
     <div className="login-page">
       <section className="login-visual" aria-hidden={false}>
         {hasLogo ? (
-          <div className="brand-logo-wrap login-logo">
-            <img className="brand-logo" src={branding.logo_url} alt={branding.brand_name} />
-          </div>
+          <BrandLogo src={branding.logo_url} alt={branding.brand_name} wrapClassName="login-logo" />
         ) : (
           <div className="brand-row" style={{ marginBottom: 0 }}>
             <div className="brand-mark">FI</div>
